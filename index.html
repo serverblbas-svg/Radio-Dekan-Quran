@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radio Dekan Quran</title>
+    <style>
+        /* دیزاینی شاهانەی ڕەش و زێڕینی تایبەت بە قورئانی پیرۆز */
+        body {
+            background-color: #0d0d0d;
+            color: #f3e5ab; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #141414;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #d4af37; 
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.25);
+        }
+        h1 {
+            font-size: 28px;
+            color: #d4af37;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+        .sub-title {
+            font-size: 14px;
+            color: #aa9966;
+            margin-bottom: 25px;
+        }
+        
+        /* بەشی لێدانی دەنگ */
+        .player-section {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 1px solid #333;
+        }
+        #current-surah {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 15px;
+        }
+        audio {
+            width: 100%;
+            outline: none;
+        }
+        
+        /* تۆڕی جوزئەکان */
+        .juz-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            max-height: 50vh;
+            overflow-y: auto;
+            padding-left: 5px;
+        }
+        
+        /* ستایلی سکڕۆڵ بار */
+        .juz-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+        .juz-grid::-webkit-scrollbar-thumb {
+            background: #d4af37;
+            border-radius: 3px;
+        }
+        
+        .juz-card {
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #252525;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 15px;
+            font-weight: bold;
+            color: #ccc;
+        }
+        .juz-card:hover {
+            background: #d4af37;
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(212, 175, 55, 0.2);
+        }
+        .juz-card.active {
+            background: #d4af37;
+            color: #000;
+            border-color: #fff;
+        }
+        
+        /* دوگمەی تایبەتی دوعای خەتمی قورئان */
+        .dua-card {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #8a6f27 0%, #d4af37 100%);
+            color: #000 !important;
+            border: none;
+            font-size: 16px;
+        }
+        .dua-card:hover {
+            background: linear-gradient(135deg, #d4af37 0%, #fff 100%);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>📻 Radio Dekan Quran</h1>
+            <div class="sub-title">دیارییەک بۆ کاکە دێکان • ٣٠ جوزئی قورئانی پیرۆز</div>
+        </div>
+
+        <div class="player-section">
+            <div id="current-surah">جوزئێک یان دوعای خەتم هەڵبژێره</div>
+            <audio id="audioPlayer" controls></audio>
+        </div>
+
+        <div class="juz-grid" id="juzGrid"></div>
+    </div>
+
+    <script>
+        // لیستی فەرمی داتاکانی تۆ
+        const playlist = [
+            { name: "جوزئی 01", url: "https://dso2.raed.net:454/files/01_e4ecd.mp3" },
+            { name: "جوزئی 02", url: "https://dso7.raed.net:451/files/02_dc1d2.mp3" },
+            { name: "جوزئی 03", url: "https://dso5.raed.net:452/files/03_5db26.mp3" },
+            { name: "جوزئی 04", url: "https://dso5.raed.net:449/files/04_89ebb.mp3" },
+            { name: "جوزئی 05", url: "https://dso8.raed.net:455/files/05_953a6.mp3" },
+            { name: "جوزئی 06", url: "https://dso2.raed.net:454/files/06.mp3" },
+            { name: "جوزئی 07", url: "https://dso5.raed.net:449/files/07.mp3" },
+            { name: "جوزئی 08", url: "https://dso2.raed.net:454/files/08_72647.mp3" },
+            { name: "جوزئی 09", url: "https://dso2.raed.net:454/files/09_12254.mp3" },
+            { name: "جوزئی 10", url: "https://dso2.raed.net:454/files/10.mp3" },
+            { name: "جوزئی 11", url: "https://dso5.raed.net:452/files/11_81465.mp3" },
+            { name: "جوزئی 12", url: "https://dso2.raed.net:454/files/12_1223c.mp3" },
+            { name: "جوزئی 13", url: "https://dso5.raed.net:452/files/13_4696b.mp3" },
+            { name: "جوزئی 14", url: "https://dso7.raed.net:451/files/14.mp3" },
+            { name: "جوزئی 15", url: "https://dso2.raed.net:454/files/15.mp3" },
+            { name: "جوزئی 16", url: "https://dso2.raed.net:454/files/16.mp3" },
+            { name: "جوزئی 17", url: "https://dso2.raed.net:454/files/17_5f6e3.mp3" },
+            { name: "جوزئی 18", url: "https://dso7.raed.net:451/files/18.mp3" },
+            { name: "جوزئی 19", url: "https://dso5.raed.net:449/files/19_528fe.mp3" },
+            { name: "جوزئی 20", url: "https://dso5.raed.net:449/files/20_d0992.mp3" },
+            { name: "جوزئی 21", url: "https://dso5.raed.net:452/files/21.mp3" },
+            { name: "جوزئی 22", url: "https://dso5.raed.net:452/files/22_15d56.mp3" },
+            { name: "جوزئی 23", url: "https://dso5.raed.net:452/files/23_deff0.mp3" },
+            { name: "جوزئی 24", url: "https://dso5.raed.net:449/files/24_1492a.mp3" },
+            { name: "جوزئی 25", url: "https://dso5.raed.net:452/files/25.mp3" },
+            { name: "جوزئی 26", url: "https://dso6.raed.net:447/files/26_70fe1.mp3" },
+            { name: "جوزئی 27", url: "https://dso2.raed.net:454/files/27.mp3" },
+            { name: "جوزئی 28", url: "https://dso5.raed.net:452/files/28.mp3" },
+            { name: "جوزئی 29", url: "https://dso2.raed.net:454/files/29_c585a.mp3" },
+            { name: "جوزئی 30", url: "https://dso2.raed.net:454/files/30.mp3" },
+            { name: "دوعای خەتمی قورئان", url: "https://dso7.raed.net:451/files/031-dua-khatm-al-quran-al-kareem.mp3" }
+        ];
+
+        const grid = document.getElementById('juzGrid');
+        const audio = document.getElementById('audioPlayer');
+        const currentLabel = document.getElementById('current-surah');
+
+        // دروستکردنی کارتەکان لەسەر شاشە
+        playlist.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'juz-card';
+            
+            // ئەگەر دوعای خەتم بێت ستایلەکەی جیادەکەینەوە بۆ ئەوەی جوانتر دیار بێت
+            if(item.name === "دوعای خەتمی قورئان") {
+                card.classList.add('dua-card');
+            }
+            
+            card.innerText = item.name;
+            
+            card.onclick = () => {
+                // گۆڕینی دۆخی چالاک (Active)
+                document.querySelectorAll('.juz-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                
+                // بەگەڕخستنی دەنگەکە
+                audio.src = item.url;
+                audio.play().catch(e => console.log("لێدان کێشەی هەیە:", e));
+                currentLabel.innerText = `ئێستا لێدەدرێت: ${item.name}`;
+            };
+            
+            grid.appendChild(card);
+        });
+    </script>
+</body>
+</html>
