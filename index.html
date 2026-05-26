@@ -4,108 +4,116 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Radio Dekan Quran</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        /* دیزاینی شاهانەی ڕەش و زێڕینی تایبەت بە قورئانی پیرۆز */
+        /* دیزاینی شاهانەی سادە و کورت */
         body {
             background-color: #0d0d0d;
             color: #f3e5ab; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             text-align: center;
         }
         .container {
-            max-width: 600px;
-            margin: 40px auto;
+            max-width: 550px;
+            margin: 20px auto;
             background: #141414;
-            padding: 25px;
-            border-radius: 15px;
+            padding: 20px;
+            border-radius: 12px;
             border: 2px solid #d4af37; 
-            box-shadow: 0 0 25px rgba(212, 175, 55, 0.25);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
         }
         h1 {
-            font-size: 28px;
+            font-size: 24px;
             color: #d4af37;
-            margin-bottom: 5px;
-            letter-spacing: 1px;
-        }
-        .sub-title {
-            font-size: 14px;
-            color: #aa9966;
-            margin-bottom: 25px;
+            margin: 0 0 15px 0;
         }
         
-        /* بەشی لێدانی دەنگ */
+        /* بەشی پێدەری دەنگ */
         .player-section {
             background: #1a1a1a;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 25px;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
             border: 1px solid #333;
         }
-        #current-surah {
-            font-size: 18px;
+        #current-title {
+            font-size: 16px;
             font-weight: bold;
             color: #fff;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
-        audio {
+        video {
             width: 100%;
+            height: 45px;
+            background: #222;
+            border-radius: 5px;
             outline: none;
         }
         
-        /* تۆڕی جوزئەکان */
-        .juz-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            max-height: 50vh;
+        /* یەک لیستی ڕێک لەسەر یەک */
+        .juz-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 55vh;
             overflow-y: auto;
             padding-left: 5px;
         }
         
         /* ستایلی سکڕۆڵ بار */
-        .juz-grid::-webkit-scrollbar {
-            width: 6px;
+        .juz-list::-webkit-scrollbar {
+            width: 5px;
         }
-        .juz-grid::-webkit-scrollbar-thumb {
+        .juz-list::-webkit-scrollbar-thumb {
             background: #d4af37;
             border-radius: 3px;
         }
         
-        .juz-card {
+        .card {
             background: #1e1e1e;
-            padding: 15px;
-            border-radius: 8px;
+            padding: 12px 20px;
+            border-radius: 6px;
             border: 1px solid #252525;
             cursor: pointer;
             transition: all 0.2s ease;
             font-size: 15px;
             font-weight: bold;
             color: #ccc;
+            display: flex;
+            justify-content: geopolitical;
+            align-items: center;
+            justify-content: space-between; /* بۆ ئەوەی ناوەکە و ژمارەکە ڕێک بن */
         }
-        .juz-card:hover {
+        .card:hover {
             background: #d4af37;
             color: #000;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(212, 175, 55, 0.2);
         }
-        .juz-card.active {
+        .card.active {
             background: #d4af37;
             color: #000;
             border-color: #fff;
         }
         
-        /* دوگمەی تایبەتی دوعای خەتمی قورئان */
-        .dua-card {
-            grid-column: 1 / -1;
-            background: linear-gradient(135deg, #8a6f27 0%, #d4af37 100%);
-            color: #000 !important;
-            border: none;
-            font-size: 16px;
+        /* ستایلی تایبەت بۆ لایڤ و دوعا لەناو لیستەکەدا */
+        .live-item {
+            background: #linear-gradient(135deg, #bd2130 0%, #dc3545 100%);
+            border-color: #dc3545;
+            color: #fff;
         }
-        .dua-card:hover {
-            background: linear-gradient(135deg, #d4af37 0%, #fff 100%);
+        .live-item:hover {
+            background: #dc3545;
+            color: #fff;
+        }
+        .dua-item {
+            background: linear-gradient(135deg, #8a6f27 0%, #d4af37 100%);
+            color: #000;
+            border: none;
+        }
+        .dua-item:hover {
+            background: #fff;
+            color: #000;
         }
     </style>
 </head>
@@ -114,19 +122,21 @@
     <div class="container">
         <div class="header">
             <h1>📻 Radio Dekan Quran</h1>
-            <div class="sub-title">دیارییەک بۆ کاکە دێکان • ٣٠ جوزئی قورئانی پیرۆز</div>
         </div>
 
         <div class="player-section">
-            <div id="current-surah">جوزئێک یان دوعای خەتم هەڵبژێره</div>
-            <audio id="audioPlayer" controls></audio>
+            <div id="current-title">بار دەکرێت...</div>
+            <video id="mainPlayer" controls></video>
         </div>
 
-        <div class="juz-grid" id="juzGrid"></div>
+        <div class="juz-list" id="juzListContainer">
+            <div class="card live-item" id="liveBtn" data-index="-1">🔴 پەخشی ڕاستەوخۆی ڕادیۆ دێکان (Live)</div>
+        </div>
     </div>
 
     <script>
-        // لیستی فەرمی داتاکانی تۆ
+        const LIVE_URL = "https://183.bozztv.com/giatv/giatv-dekanquran/dekanquran/chunks.m3u8";
+
         const playlist = [
             { name: "جوزئی 01", url: "https://dso2.raed.net:454/files/01_e4ecd.mp3" },
             { name: "جوزئی 02", url: "https://dso7.raed.net:451/files/02_dc1d2.mp3" },
@@ -161,35 +171,88 @@
             { name: "دوعای خەتمی قورئان", url: "https://dso7.raed.net:451/files/031-dua-khatm-al-quran-al-kareem.mp3" }
         ];
 
-        const grid = document.getElementById('juzGrid');
-        const audio = document.getElementById('audioPlayer');
-        const currentLabel = document.getElementById('current-surah');
+        const container = document.getElementById('juzListContainer');
+        const player = document.getElementById('mainPlayer');
+        const currentLabel = document.getElementById('current-title');
+        const liveBtn = document.getElementById('liveBtn');
+        let hlsInstance = null;
+        let currentIndex = -1; // -1 واتا لایڤ لێدەدات
 
-        // دروستکردنی کارتەکان لەسەر شاشە
-        playlist.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'juz-card';
+        function startPlay(url, title, index) {
+            currentIndex = index;
+            if (hlsInstance) {
+                hlsInstance.destroy();
+                hlsInstance = null;
+            }
             
-            // ئەگەر دوعای خەتم بێت ستایلەکەی جیادەکەینەوە بۆ ئەوەی جوانتر دیار بێت
+            currentLabel.innerText = `ئێستا لێدەدرێت: ${title}`;
+
+            // چالاککردنی دوگمەی هەڵبژێردراو لە لیستەکەدا
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+            const activeCard = document.querySelector(`[data-index="${index}"]`);
+            if(activeCard) activeCard.classList.add('active');
+
+            if (url.includes('.m3u8')) {
+                if (Hls.isSupported()) {
+                    hlsInstance = new Hls();
+                    hlsInstance.loadSource(url);
+                    hlsInstance.attachMedia(player);
+                    hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+                        player.play().catch(e => console.log(e));
+                    });
+                } else if (player.canPlayType('application/vnd.apple.mpegurl')) {
+                    player.src = url;
+                    player.play();
+                }
+            } else {
+                player.src = url;
+                player.play();
+            }
+        }
+
+        // بەستنەوەی دوگمەی لایڤ
+        liveBtn.onclick = () => {
+            startPlay(LIVE_URL, "پەخشی ڕاستەوخۆ (Live)", -1);
+        };
+
+        // ڕیزکردنی ٣٠ جوزئەکە بە شێوازی یەک لیست لە خوارەوە
+        playlist.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.setAttribute('data-index', index);
+            
             if(item.name === "دوعای خەتمی قورئان") {
-                card.classList.add('dua-card');
+                card.classList.add('dua-item');
             }
             
             card.innerText = item.name;
             
             card.onclick = () => {
-                // گۆڕینی دۆخی چالاک (Active)
-                document.querySelectorAll('.juz-card').forEach(c => c.classList.remove('active'));
-                card.classList.add('active');
-                
-                // بەگەڕخستنی دەنگەکە
-                audio.src = item.url;
-                audio.play().catch(e => console.log("لێدان کێشەی هەیە:", e));
-                currentLabel.innerText = `ئێستا لێدەدرێت: ${item.name}`;
+                startPlay(item.url, item.name, index);
             };
             
-            grid.appendChild(card);
+            container.appendChild(card);
         });
+
+        // سستەمی دووبارەکردنەوەی ئۆتۆماتیکی (Loop)
+        player.onended = () => {
+            if (currentIndex !== -1) { // ئەگەر لایڤ نەبوو (جوزئەکان بوو)
+                let nextIndex = currentIndex + 1;
+                
+                // ئەگەر خەتمەکە تەواو بوو (دوای دوعاکە)، دەگەڕێتەوە بۆ جوزئی یەکەم
+                if (nextIndex >= playlist.length) {
+                    nextIndex = 0;
+                }
+                
+                const nextItem = playlist[nextIndex];
+                startPlay(nextItem.url, nextItem.name, nextIndex);
+            }
+        };
+
+        // لە سەرەتادا خۆی ئۆتۆماتیکی لایڤەکە لێدەدات
+        window.onload = () => {
+            liveBtn.click();
+        };
     </script>
 </body>
 </html>
