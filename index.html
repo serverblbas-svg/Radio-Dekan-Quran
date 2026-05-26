@@ -5,132 +5,623 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Radio Dekan Quran</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* دیزاینی شاهانەی سادە و کورت */
+        :root {
+            --gold: #d4af37;
+            --gold-light: #f0d060;
+            --gold-dim: #9a7d20;
+            --bg: #080808;
+            --surface: #0f0f0f;
+            --surface2: #161616;
+            --surface3: #1c1c1c;
+            --red: #c0392b;
+            --red-bright: #e74c3c;
+            --text: #f0e6c0;
+            --text-dim: #8a7a50;
+            --border: rgba(212,175,55,0.15);
+            --border-bright: rgba(212,175,55,0.5);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            background-color: #0d0d0d;
-            color: #f3e5ab; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 15px;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Noto Naskh Arabic', 'Amiri', serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Islamic geometric background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(212,175,55,0.04) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(212,175,55,0.03) 0%, transparent 50%),
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4af37' fill-opacity='0.03'%3E%3Cpath d='M30 0l8.66 5v10L30 20l-8.66-5V5L30 0zm0 40l8.66 5v10L30 60l-8.66-5V45L30 40zM0 20l8.66 5v10L0 40l-8.66-5V25L0 20zm60 0l8.66 5v10L60 40l-8.66-5V25L60 20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .page-wrap {
+            position: relative;
+            z-index: 1;
+            max-width: 560px;
+            margin: 0 auto;
+            padding: 20px 16px 40px;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
             text-align: center;
+            padding: 30px 0 24px;
+            position: relative;
         }
-        .container {
-            max-width: 550px;
-            margin: 20px auto;
-            background: #141414;
-            padding: 20px;
-            border-radius: 12px;
-            border: 2px solid #d4af37; 
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+
+        .header-ornament {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 10px;
         }
-        h1 {
-            font-size: 24px;
-            color: #d4af37;
-            margin: 0 0 15px 0;
+
+        .ornament-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to var(--dir, right), transparent, var(--gold));
+            max-width: 80px;
         }
-        
-        /* بەشی پێدەری دەنگ */
-        .player-section {
-            background: #1a1a1a;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #333;
+        .ornament-line.left { --dir: left; }
+
+        .ornament-diamond {
+            width: 8px;
+            height: 8px;
+            background: var(--gold);
+            transform: rotate(45deg);
+            box-shadow: 0 0 10px var(--gold);
         }
-        #current-title {
-            font-size: 16px;
-            font-weight: bold;
-            color: #fff;
+
+        .radio-icon-wrap {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(212,175,55,0.15) 0%, transparent 70%);
+            border: 1px solid var(--border-bright);
             margin-bottom: 12px;
+            animation: pulseRing 3s ease-in-out infinite;
         }
-        video {
+
+        @keyframes pulseRing {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(212,175,55,0.3), 0 0 20px rgba(212,175,55,0.1); }
+            50% { box-shadow: 0 0 0 12px rgba(212,175,55,0), 0 0 30px rgba(212,175,55,0.2); }
+        }
+
+        .radio-icon-wrap svg {
+            width: 30px;
+            height: 30px;
+            fill: var(--gold);
+        }
+
+        .header h1 {
+            font-family: 'Amiri', serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--gold);
+            letter-spacing: 0.5px;
+            line-height: 1.3;
+        }
+
+        .header p {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-top: 4px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* ===== PLAYER CARD ===== */
+        .player-card {
+            background: var(--surface);
+            border: 1px solid var(--border-bright);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow:
+                0 0 40px rgba(212,175,55,0.08),
+                inset 0 1px 0 rgba(212,175,55,0.1);
+        }
+
+        .player-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(to left, transparent, var(--gold), transparent);
+        }
+
+        .now-playing-label {
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        #current-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 18px;
+            line-height: 1.5;
+            min-height: 26px;
+        }
+
+        /* Sound wave animation */
+        .wave-bars {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            margin-bottom: 16px;
+            height: 30px;
+        }
+
+        .wave-bars.paused .bar { animation-play-state: paused; }
+
+        .bar {
+            width: 3px;
+            border-radius: 2px;
+            background: var(--gold);
+            animation: waveAnim 1.2s ease-in-out infinite;
+            transform-origin: bottom;
+        }
+        .bar:nth-child(1) { animation-delay: 0s; height: 8px; }
+        .bar:nth-child(2) { animation-delay: 0.1s; height: 16px; }
+        .bar:nth-child(3) { animation-delay: 0.2s; height: 24px; }
+        .bar:nth-child(4) { animation-delay: 0.3s; height: 18px; }
+        .bar:nth-child(5) { animation-delay: 0.4s; height: 28px; }
+        .bar:nth-child(6) { animation-delay: 0.15s; height: 20px; }
+        .bar:nth-child(7) { animation-delay: 0.25s; height: 14px; }
+        .bar:nth-child(8) { animation-delay: 0.05s; height: 22px; }
+        .bar:nth-child(9) { animation-delay: 0.35s; height: 10px; }
+        .bar:nth-child(10) { animation-delay: 0.45s; height: 18px; }
+
+        @keyframes waveAnim {
+            0%, 100% { transform: scaleY(0.4); opacity: 0.5; }
+            50% { transform: scaleY(1); opacity: 1; }
+        }
+
+        /* Custom audio controls */
+        .custom-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ctrl-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s, transform 0.15s;
+            padding: 4px;
+            border-radius: 50%;
+        }
+
+        .ctrl-btn:hover { color: var(--gold); transform: scale(1.1); }
+
+        .play-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+            color: #000 !important;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(212,175,55,0.3);
+            transition: all 0.2s;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.08) !important;
+            box-shadow: 0 6px 20px rgba(212,175,55,0.4);
+        }
+
+        .progress-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .progress-bar {
             width: 100%;
-            height: 45px;
-            background: #222;
-            border-radius: 5px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--surface3);
+            border-radius: 2px;
+            cursor: pointer;
             outline: none;
         }
-        
-        /* یەک لیستی ڕێک لەسەر یەک */
+
+        .progress-bar::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--gold);
+            box-shadow: 0 0 6px rgba(212,175,55,0.5);
+            cursor: pointer;
+        }
+
+        .time-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-dim);
+            font-family: 'Courier New', monospace;
+        }
+
+        .volume-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .vol-slider {
+            width: 70px;
+            height: 3px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--surface3);
+            border-radius: 2px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .vol-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--gold);
+            cursor: pointer;
+        }
+
+        /* hidden real audio */
+        #mainPlayer { display: none; }
+
+        /* ===== LIST SECTION ===== */
+        .list-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding: 0 2px;
+        }
+
+        .list-title {
+            font-size: 13px;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .list-line {
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
         .juz-list {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            max-height: 55vh;
+            gap: 5px;
+            max-height: 52vh;
             overflow-y: auto;
-            padding-left: 5px;
+            padding-left: 2px;
+            padding-right: 2px;
         }
-        
-        /* ستایلی سکڕۆڵ بار */
-        .juz-list::-webkit-scrollbar {
-            width: 5px;
-        }
-        .juz-list::-webkit-scrollbar-thumb {
-            background: #d4af37;
-            border-radius: 3px;
-        }
-        
+
+        .juz-list::-webkit-scrollbar { width: 4px; }
+        .juz-list::-webkit-scrollbar-track { background: var(--surface); border-radius: 2px; }
+        .juz-list::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+
+        /* ===== CARDS ===== */
         .card {
-            background: #1e1e1e;
-            padding: 12px 20px;
-            border-radius: 6px;
-            border: 1px solid #252525;
+            background: var(--surface2);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 15px;
-            font-weight: bold;
-            color: #ccc;
+            transition: all 0.22s ease;
             display: flex;
-            justify-content: geopolitical;
             align-items: center;
-            justify-content: space-between; /* بۆ ئەوەی ناوەکە و ژمارەکە ڕێک بن */
+            gap: 12px;
+            padding: 10px 14px;
+            position: relative;
+            overflow: hidden;
         }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            right: 0; top: 0; bottom: 0;
+            width: 3px;
+            background: var(--gold);
+            border-radius: 0 10px 10px 0;
+            transform: scaleY(0);
+            transition: transform 0.2s ease;
+        }
+
         .card:hover {
-            background: #d4af37;
-            color: #000;
+            background: var(--surface3);
+            border-color: var(--border-bright);
+            transform: translateX(-2px);
         }
+
+        .card:hover::after { transform: scaleY(1); }
+
         .card.active {
-            background: #d4af37;
-            color: #000;
-            border-color: #fff;
+            background: linear-gradient(135deg, rgba(212,175,55,0.12) 0%, rgba(212,175,55,0.05) 100%);
+            border-color: var(--border-bright);
         }
-        
-        /* ستایلی تایبەت بۆ لایڤ و دوعا لەناو لیستەکەدا */
+
+        .card.active::after { transform: scaleY(1); }
+
+        .card-num {
+            min-width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--text-dim);
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .card.active .card-num {
+            background: var(--gold);
+            color: #000;
+            border-color: var(--gold);
+        }
+
+        .card-name {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 600;
+            color: #ccc;
+            transition: color 0.2s;
+        }
+
+        .card:hover .card-name { color: #fff; }
+        .card.active .card-name { color: var(--gold-light); }
+
+        .card-play-icon {
+            width: 22px;
+            height: 22px;
+            opacity: 0;
+            color: var(--gold);
+            transition: opacity 0.2s;
+            flex-shrink: 0;
+        }
+
+        .card:hover .card-play-icon,
+        .card.active .card-play-icon { opacity: 1; }
+
+        /* Live card */
         .live-item {
-            background: #linear-gradient(135deg, #bd2130 0%, #dc3545 100%);
-            border-color: #dc3545;
-            color: #fff;
+            background: linear-gradient(135deg, rgba(192,57,43,0.2) 0%, rgba(192,57,43,0.08) 100%);
+            border-color: rgba(231,76,60,0.4);
+            margin-bottom: 4px;
         }
+
         .live-item:hover {
-            background: #dc3545;
+            background: linear-gradient(135deg, rgba(231,76,60,0.25) 0%, rgba(231,76,60,0.12) 100%);
+            border-color: rgba(231,76,60,0.7);
+            transform: translateX(-2px);
+        }
+
+        .live-item::after { background: var(--red-bright); }
+
+        .live-item.active {
+            background: linear-gradient(135deg, rgba(231,76,60,0.25) 0%, rgba(231,76,60,0.1) 100%);
+            border-color: rgba(231,76,60,0.6);
+        }
+
+        .live-item .card-num {
+            background: rgba(231,76,60,0.15);
+            border-color: rgba(231,76,60,0.4);
+        }
+
+        .live-item.active .card-num {
+            background: var(--red-bright);
             color: #fff;
+            border-color: var(--red-bright);
         }
+
+        .live-item .card-name { color: #f0a0a0; }
+        .live-item:hover .card-name { color: #fff; }
+        .live-item.active .card-name { color: #ff8888; }
+
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--red-bright);
+            flex-shrink: 0;
+            animation: livePulse 1.4s ease-in-out infinite;
+            box-shadow: 0 0 6px var(--red-bright);
+        }
+
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.7); }
+        }
+
+        /* Dua card */
         .dua-item {
-            background: linear-gradient(135deg, #8a6f27 0%, #d4af37 100%);
-            color: #000;
-            border: none;
+            background: linear-gradient(135deg, rgba(212,175,55,0.15) 0%, rgba(212,175,55,0.05) 100%);
+            border-color: rgba(212,175,55,0.4);
         }
+
         .dua-item:hover {
-            background: #fff;
-            color: #000;
+            background: linear-gradient(135deg, rgba(212,175,55,0.25) 0%, rgba(212,175,55,0.1) 100%);
+        }
+
+        .dua-item .card-name { color: var(--gold-light); }
+
+        /* loading animation for cards on entry */
+        .card {
+            animation: cardSlideIn 0.3s ease both;
+        }
+
+        @keyframes cardSlideIn {
+            from { opacity: 0; transform: translateX(15px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer p {
+            font-size: 11px;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+        }
+
+        /* progress fill visual */
+        .progress-bar-wrap {
+            position: relative;
+            flex: 1;
+        }
+
+        .progress-fill {
+            position: absolute;
+            top: 0; left: 0;
+            height: 100%;
+            background: linear-gradient(to right, var(--gold), var(--gold-light));
+            border-radius: 2px;
+            pointer-events: none;
+            width: 0%;
+            transition: width 0.3s linear;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <div class="page-wrap">
+
+        <!-- HEADER -->
         <div class="header">
-            <h1>📻 Radio Dekan Quran</h1>
+            <div class="header-ornament">
+                <div class="ornament-line left"></div>
+                <div class="ornament-diamond"></div>
+                <div class="ornament-line"></div>
+            </div>
+            <div class="radio-icon-wrap">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 6H6.83L14.59 1.17 13.41 0 4 5.41V6A2 2 0 002 8v12a2 2 0 002 2h16a2 2 0 002-2V8a2 2 0 00-2-2zm0 14H4V8h16v12zM7 15a5 5 0 005 5 5 5 0 005-5 5 5 0 00-5-5 5 5 0 00-5 5zm5-3a3 3 0 110 6 3 3 0 010-6zm0 2a1 1 0 100 2 1 1 0 000-2zm7-4h2v2h-2z"/>
+                </svg>
+            </div>
+            <h1>Radio Dekan Quran</h1>
+            <p>ڕادیۆی قورئانی کەریم</p>
         </div>
 
-        <div class="player-section">
+        <!-- PLAYER CARD -->
+        <div class="player-card">
+            <div class="now-playing-label">NOW PLAYING</div>
             <div id="current-title">بار دەکرێت...</div>
-            <video id="mainPlayer" controls></video>
+
+            <div class="wave-bars paused" id="waveBars">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+
+            <!-- Custom controls -->
+            <div class="custom-controls">
+                <button class="ctrl-btn play-btn" id="playPauseBtn" title="Play/Pause">
+                    <svg id="playIcon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    <svg id="pauseIcon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                    </svg>
+                </button>
+
+                <div class="progress-wrap">
+                    <div style="position:relative; height:4px; border-radius:2px; background:var(--surface3);">
+                        <div class="progress-fill" id="progressFill"></div>
+                        <input type="range" class="progress-bar" id="progressBar" min="0" max="100" value="0" style="position:absolute;inset:0;opacity:0;height:100%;width:100%;margin:0;cursor:pointer;">
+                    </div>
+                    <div class="time-row">
+                        <span id="timeElapsed">0:00</span>
+                        <span id="timeDuration">0:00</span>
+                    </div>
+                </div>
+
+                <div class="volume-wrap">
+                    <button class="ctrl-btn" id="muteBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+                        </svg>
+                    </button>
+                    <input type="range" class="vol-slider" id="volSlider" min="0" max="1" step="0.05" value="1">
+                </div>
+            </div>
+
+            <audio id="mainPlayer"></audio>
+        </div>
+
+        <!-- LIST -->
+        <div class="list-header">
+            <div class="list-title">ڕێنووسی قورئان</div>
+            <div class="list-line"></div>
         </div>
 
         <div class="juz-list" id="juzListContainer">
-            <div class="card live-item" id="liveBtn" data-index="-1">🔴 پەخشی ڕاستەوخۆی ڕادیۆ دێکان (Live)</div>
+            <!-- Live card -->
+            <div class="card live-item" id="liveBtn" data-index="-1">
+                <div class="live-dot"></div>
+                <div class="card-name">پەخشی ڕاستەوخۆی ڕادیۆ دێکان (Live)</div>
+                <svg class="card-play-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Radio Dekan Quran &mdash; Dedicated to the Holy Quran</p>
         </div>
     </div>
 
@@ -175,22 +666,47 @@
         const player = document.getElementById('mainPlayer');
         const currentLabel = document.getElementById('current-title');
         const liveBtn = document.getElementById('liveBtn');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const timeElapsed = document.getElementById('timeElapsed');
+        const timeDuration = document.getElementById('timeDuration');
+        const volSlider = document.getElementById('volSlider');
+        const waveBars = document.getElementById('waveBars');
+
         let hlsInstance = null;
-        let currentIndex = -1; // -1 واتا لایڤ لێدەدات
+        let currentIndex = -1;
+        let isPlaying = false;
+
+        function formatTime(s) {
+            if (isNaN(s)) return '0:00';
+            const m = Math.floor(s / 60);
+            const sec = Math.floor(s % 60);
+            return `${m}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+
+        function setPlayState(playing) {
+            isPlaying = playing;
+            playIcon.style.display = playing ? 'none' : 'block';
+            pauseIcon.style.display = playing ? 'block' : 'none';
+            if (playing) {
+                waveBars.classList.remove('paused');
+            } else {
+                waveBars.classList.add('paused');
+            }
+        }
 
         function startPlay(url, title, index) {
             currentIndex = index;
-            if (hlsInstance) {
-                hlsInstance.destroy();
-                hlsInstance = null;
-            }
-            
-            currentLabel.innerText = `ئێستا لێدەدرێت: ${title}`;
+            if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
 
-            // چالاککردنی دوگمەی هەڵبژێردراو لە لیستەکەدا
+            currentLabel.innerText = 'ئێستا لێدەدرێت: ' + title;
+
             document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
-            const activeCard = document.querySelector(`[data-index="${index}"]`);
-            if(activeCard) activeCard.classList.add('active');
+            const activeCard = document.querySelector('[data-index="' + index + '"]');
+            if (activeCard) activeCard.classList.add('active');
 
             if (url.includes('.m3u8')) {
                 if (Hls.isSupported()) {
@@ -210,49 +726,89 @@
             }
         }
 
-        // بەستنەوەی دوگمەی لایڤ
-        liveBtn.onclick = () => {
-            startPlay(LIVE_URL, "پەخشی ڕاستەوخۆ (Live)", -1);
+        // Play/Pause toggle
+        playPauseBtn.onclick = () => {
+            if (player.paused) { player.play(); }
+            else { player.pause(); }
         };
 
-        // ڕیزکردنی ٣٠ جوزئەکە بە شێوازی یەک لیست لە خوارەوە
+        player.onplay = () => setPlayState(true);
+        player.onpause = () => setPlayState(false);
+
+        // Progress
+        player.ontimeupdate = () => {
+            if (!isNaN(player.duration) && player.duration > 0) {
+                const pct = (player.currentTime / player.duration) * 100;
+                progressBar.value = pct;
+                progressFill.style.width = pct + '%';
+                timeElapsed.textContent = formatTime(player.currentTime);
+                timeDuration.textContent = formatTime(player.duration);
+            }
+        };
+
+        progressBar.oninput = () => {
+            if (!isNaN(player.duration)) {
+                player.currentTime = (progressBar.value / 100) * player.duration;
+                progressFill.style.width = progressBar.value + '%';
+            }
+        };
+
+        // Volume
+        volSlider.oninput = () => {
+            player.volume = volSlider.value;
+        };
+
+        // Live button
+        liveBtn.onclick = () => {
+            startPlay(LIVE_URL, 'پەخشی ڕاستەوخۆ (Live)', -1);
+        };
+
+        // Build playlist cards
         playlist.forEach((item, index) => {
             const card = document.createElement('div');
             card.className = 'card';
             card.setAttribute('data-index', index);
-            
-            if(item.name === "دوعای خەتمی قورئان") {
+            card.style.animationDelay = (index * 0.025) + 's';
+
+            if (item.name === 'دوعای خەتمی قورئان') {
                 card.classList.add('dua-item');
             }
-            
-            card.innerText = item.name;
-            
-            card.onclick = () => {
-                startPlay(item.url, item.name, index);
-            };
-            
+
+            const numEl = document.createElement('div');
+            numEl.className = 'card-num';
+            numEl.textContent = String(index + 1).padStart(2, '0');
+
+            const nameEl = document.createElement('div');
+            nameEl.className = 'card-name';
+            nameEl.textContent = item.name;
+
+            const iconEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            iconEl.setAttribute('class', 'card-play-icon');
+            iconEl.setAttribute('viewBox', '0 0 24 24');
+            iconEl.setAttribute('fill', 'currentColor');
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', 'M8 5v14l11-7z');
+            iconEl.appendChild(path);
+
+            card.appendChild(numEl);
+            card.appendChild(nameEl);
+            card.appendChild(iconEl);
+
+            card.onclick = () => startPlay(item.url, item.name, index);
             container.appendChild(card);
         });
 
-        // سستەمی دووبارەکردنەوەی ئۆتۆماتیکی (Loop)
+        // Auto-play next
         player.onended = () => {
-            if (currentIndex !== -1) { // ئەگەر لایڤ نەبوو (جوزئەکان بوو)
-                let nextIndex = currentIndex + 1;
-                
-                // ئەگەر خەتمەکە تەواو بوو (دوای دوعاکە)، دەگەڕێتەوە بۆ جوزئی یەکەم
-                if (nextIndex >= playlist.length) {
-                    nextIndex = 0;
-                }
-                
-                const nextItem = playlist[nextIndex];
-                startPlay(nextItem.url, nextItem.name, nextIndex);
+            if (currentIndex !== -1) {
+                let next = currentIndex + 1;
+                if (next >= playlist.length) next = 0;
+                startPlay(playlist[next].url, playlist[next].name, next);
             }
         };
 
-        // لە سەرەتادا خۆی ئۆتۆماتیکی لایڤەکە لێدەدات
-        window.onload = () => {
-            liveBtn.click();
-        };
+        // Auto-start live on load
+        window.onload = () => { liveBtn.click(); };
     </script>
 </body>
 </html>
